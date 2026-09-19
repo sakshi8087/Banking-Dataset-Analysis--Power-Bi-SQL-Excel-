@@ -1,1 +1,1093 @@
 
+# 🏦 Banking Analytics — End-to-End Data Analytics Project
+
+An end-to-end **Banking Analytics project** built using **SQL, relational database design, ERD modeling, and Power BI** to transform raw banking data into actionable business insights.
+
+The project covers the complete analytics lifecycle — from **data validation and relational database design** to **advanced SQL analysis, analytical views, stored procedures, customer segmentation, loan risk analysis, and interactive Power BI dashboards**.
+
+> **Tools:** SQL Server / SQL, Power BI, ERD, DAX
+> **Domain:** Banking & Financial Services
+> **Project Type:** End-to-End Data Analytics / Business Intelligence
+
+---
+
+## 📌 Project Overview
+
+Banks generate large volumes of customer, account, transaction, branch, and loan data. Simply storing this information is not enough — it needs to be transformed into reliable metrics that can support decisions related to:
+
+* Customer value and engagement
+* Deposit performance
+* Transaction activity
+* Loan portfolio and risk
+* Branch performance
+* Product adoption
+* Customer segmentation
+* Operational monitoring
+
+This project was developed to simulate a banking analytics environment where operational banking data is transformed into a structured analytical system and presented through interactive Power BI dashboards.
+
+The project follows a layered approach:
+
+```text
+Raw Banking Data
+       ↓
+Data Validation & Quality Checks
+       ↓
+Relational Database / ERD
+       ↓
+SQL Transformation & Business Logic
+       ↓
+Analytical Views & Stored Procedures
+       ↓
+Power BI Data Model
+       ↓
+Interactive Dashboards
+       ↓
+Business Insights
+```
+
+---
+
+# 🎯 Business Objectives
+
+The primary objectives of the project were to:
+
+1. Build a structured relational banking database.
+2. Validate the quality and integrity of banking data.
+3. Establish relationships between customers, accounts, transactions, loans, and branches.
+4. Develop reusable SQL analytical views.
+5. Apply banking-specific business logic.
+6. Analyze customer behavior and engagement.
+7. Analyze loan applications and credit risk.
+8. Evaluate branch-level performance.
+9. Analyze banking product adoption.
+10. Build interactive Power BI dashboards for business users.
+
+---
+
+# 🗂️ Dataset Structure
+
+The project uses five primary banking entities.
+
+| Table          | Key              | Description                                     |
+| -------------- | ---------------- | ----------------------------------------------- |
+| `Customers`    | `Customer_ID`    | Customer demographic and financial information  |
+| `Accounts`     | `Account_ID`     | Customer account and balance information        |
+| `Transactions` | `Transaction_ID` | Account-level transaction history               |
+| `Loans`        | `Loan_ID`        | Customer loan applications and loan information |
+| `Branches`     | `Branch_ID`      | Branch and manager information                  |
+
+### Customers
+
+Contains:
+
+* Customer ID
+* Name
+* Age
+* Gender
+* City
+* Occupation
+* Annual Income
+* Credit Score
+
+### Accounts
+
+Contains:
+
+* Account ID
+* Customer ID
+* Branch ID
+* Account Type
+* Balance
+* Opening Date
+
+### Transactions
+
+Contains:
+
+* Transaction ID
+* Account ID
+* Transaction Date
+* Transaction Type
+* Amount
+
+### Loans
+
+Contains:
+
+* Loan ID
+* Customer ID
+* Loan Type
+* Loan Amount
+* Interest Rate
+* Loan Status
+
+### Branches
+
+Contains:
+
+* Branch ID
+* Branch Name
+* City
+* Manager Name
+
+---
+
+# 🧩 ERD / Database Design
+
+The database was designed using a relational structure with primary keys and foreign keys to maintain referential integrity.
+
+### Core Relationships
+
+```text
+Customers
+   │
+   ├──────────< Accounts >────────── Branches
+   │                  │
+   │                  │
+   │                  └──────────< Transactions
+   │
+   └──────────< Loans
+```
+
+### Relationships
+
+* **Customer → Accounts:** One-to-Many
+* **Account → Transactions:** One-to-Many
+* **Branch → Accounts:** One-to-Many
+* **Customer → Loans:** One-to-Many
+
+Primary and foreign key constraints were implemented to reduce orphan records and maintain consistency across the database.
+
+---
+
+# 🧹 Data Quality & Validation
+
+Before performing business analysis, several validation checks were performed.
+
+## Business Logic Validation
+
+Examples include:
+
+### Negative Account Balances
+
+```sql
+SELECT *
+FROM Accounts$
+WHERE Balance < 0;
+```
+
+### Invalid Transaction Amounts
+
+```sql
+SELECT *
+FROM Transactions$
+WHERE Amount <= 0;
+```
+
+### Invalid Customer Age
+
+```sql
+SELECT *
+FROM ['Customers (1)$']
+WHERE Age <= 18 OR Age >= 100;
+```
+
+### Invalid Annual Income
+
+```sql
+SELECT *
+FROM ['Customers (1)$']
+WHERE Annual_Income <= 0;
+```
+
+### Unrealistic Loan Amounts
+
+```sql
+SELECT *
+FROM Loans$
+WHERE Loan_Amount > 10000000;
+```
+
+### Invalid Interest Rates
+
+```sql
+SELECT *
+FROM Loans$
+WHERE Interest_Rate <= 0
+   OR Interest_Rate >= 30;
+```
+
+### Future Transaction Dates
+
+```sql
+SELECT *
+FROM Transactions$
+WHERE Transaction_Date > CURRENT_DATE;
+```
+
+---
+
+# 🔍 Completeness Checks
+
+Mandatory fields were checked across major entities.
+
+Examples:
+
+* Missing Customer IDs
+* Missing Customer Names
+* Missing Account IDs
+* Missing Account Types
+* Missing Balances
+* Missing Transaction IDs
+* Missing Transaction Dates
+* Missing Loan IDs
+* Missing Loan Amounts
+* Missing Loan Types
+
+This helped ensure that downstream KPIs were not distorted by incomplete records.
+
+---
+
+# ♻️ Duplicate Record Checks
+
+Duplicate primary/business keys were identified using `GROUP BY` and `HAVING`.
+
+Example:
+
+```sql
+SELECT Customer_ID,
+       COUNT(*) AS Duplicate_Count
+FROM ['Customers (1)$']
+GROUP BY Customer_ID
+HAVING COUNT(*) > 1;
+```
+
+Similar checks were performed for:
+
+* Customers
+* Accounts
+* Transactions
+* Loans
+
+---
+
+# 🔗 Referential Integrity
+
+Relationships between entities were validated using SQL joins.
+
+Checks included:
+
+* Accounts without customers
+* Transactions without accounts
+* Loans without customers
+* Customers without accounts
+* Accounts without transactions
+
+Primary and foreign key constraints were subsequently implemented at the database level.
+
+---
+
+# 🧠 SQL Analysis
+
+The project uses SQL not only for querying data but also for implementing reusable banking business logic.
+
+## SQL Concepts Used
+
+### Basic SQL
+
+* `SELECT`
+* `WHERE`
+* `GROUP BY`
+* `HAVING`
+* `ORDER BY`
+* `DISTINCT`
+* `TOP`
+
+### Advanced SQL
+
+* `JOIN`
+* `LEFT JOIN`
+* `CROSS JOIN`
+* `CASE`
+* `COALESCE`
+* Aggregate functions
+* CTEs
+* Window functions
+* Views
+* Stored procedures
+* Primary keys
+* Foreign keys
+* Constraints
+* Indexing
+
+---
+
+# 📊 Key Banking Analytics
+
+## 1. Account Type Distribution
+
+Analyzed the number of accounts by account type.
+
+```sql
+SELECT Account_Type,
+       COUNT(*) AS No_of_Accounts
+FROM Accounts$
+GROUP BY Account_Type;
+```
+
+---
+
+## 2. Branch Deposit Performance
+
+Measured total deposits held by each branch.
+
+```sql
+SELECT b.Branch_Name,
+       SUM(a.Balance) AS Total_Deposits
+FROM Branches$ b
+JOIN Accounts$ a
+    ON a.Branch_ID = b.Branch_ID
+GROUP BY b.Branch_Name
+ORDER BY Total_Deposits DESC;
+```
+
+---
+
+## 3. Customer Distribution by City
+
+Analyzed customer concentration geographically.
+
+```sql
+SELECT City,
+       COUNT(Customer_ID) AS Customer_Count
+FROM ['Customers (1)$']
+GROUP BY City
+ORDER BY Customer_Count DESC;
+```
+
+---
+
+## 4. Customer Transaction Analysis
+
+Measured transaction frequency and total transaction value at customer level.
+
+Metrics include:
+
+* Total Transactions
+* Total Transaction Value
+* Customer transaction ranking
+
+---
+
+## 5. Customer Deposit Behavior
+
+Analyzed:
+
+* Number of accounts
+* Total balance
+* Average account balance
+
+This provides a view of customer deposit behavior and account ownership.
+
+---
+
+# 💳 Loan Analytics
+
+Loan analysis was performed across loan types, statuses, amounts, and risk categories.
+
+## Loan Type Popularity
+
+```sql
+SELECT Loan_Type,
+       COUNT(*) AS No_of_Loans
+FROM Loans$
+GROUP BY Loan_Type
+ORDER BY No_of_Loans DESC;
+```
+
+## Loan Status Analysis
+
+Analyzed:
+
+* Approved loans
+* Rejected loans
+* Pending loans
+* Loan application volume
+* Total loan value
+
+## Approved Loan Portfolio
+
+The approved loan portfolio was analyzed separately to distinguish loan applications from approved lending exposure.
+
+Metrics include:
+
+* Approved loan count
+* Total approved loan exposure
+* Average approved loan amount
+* Largest approved loan
+* Smallest approved loan
+
+---
+
+# ⚠️ Loan Risk Analysis
+
+A **Loan-to-Income (LTI) ratio** was used as the core risk metric.
+
+```text
+Loan Income Ratio =
+Loan Amount / Annual Income
+```
+
+The project applies the following analytical risk framework:
+
+| LTI Ratio | Risk Category |
+| --------: | ------------- |
+|     `< 2` | Low Risk      |
+|  `2 – <5` | Medium Risk   |
+| `5 – <10` | High Risk     |
+|   `>= 10` | Critical Risk |
+
+This logic was implemented using SQL `CASE` expressions and analytical views.
+
+---
+
+# 👤 Customer Segmentation
+
+Customer segmentation combines:
+
+* Annual income
+* Total account balance
+* Transaction activity
+
+Each customer receives an analytical score based on these dimensions.
+
+### Income Score
+
+```text
+High Income     → 3
+Middle Income   → 2
+Lower Income    → 1
+```
+
+### Balance Score
+
+```text
+High Balance    → 3
+Medium Balance  → 2
+Lower Balance   → 1
+```
+
+### Activity Score
+
+```text
+High Activity   → 3
+Moderate        → 2
+Low Activity    → 1
+```
+
+The combined score is used to categorize customers into:
+
+* Premium Customers
+* Regular Customers
+* Low Engagement Customers
+
+---
+
+# 💎 Customer Lifetime Value Analysis
+
+A simplified Customer Lifetime Value framework was created using three dimensions:
+
+1. Deposit balance
+2. Transaction activity
+3. Loan relationship
+
+A composite CLV score was generated using SQL `CASE` expressions.
+
+This enables customers to be analyzed according to their overall relationship with the bank rather than using a single metric.
+
+---
+
+# 📈 Window Functions
+
+Window functions were used for advanced analytics without requiring complex self-joins.
+
+Examples include:
+
+### Customer Ranking
+
+```sql
+RANK() OVER (
+    ORDER BY SUM(a.Balance) DESC
+)
+```
+
+### Branch Ranking
+
+Branches were ranked according to total deposit contribution.
+
+### Running Transaction Total
+
+```sql
+SUM(Amount) OVER (
+    ORDER BY Transaction_Date, Transaction_ID
+)
+```
+
+This provides a cumulative view of transaction value over time.
+
+---
+
+# 🧱 CTEs
+
+Common Table Expressions were used to break complex analytical problems into smaller logical steps.
+
+Examples include:
+
+* Customer value scoring
+* Monthly transaction analysis
+* Customer transaction aggregation
+* Loan risk categorization
+* Customer segmentation
+* Customer 360 analysis
+
+This improved query readability and made complex transformations easier to validate.
+
+---
+
+# 🪟 SQL Analytical Views
+
+Reusable SQL views were created as an analytical layer between the operational database and Power BI.
+
+Key views include:
+
+```text
+vw_customer_details_360
+vw_transaction_activity
+vw_transaction_kpis
+vw_account_product_analysis
+vw_loan_product_analysis
+vw_executive_kpis
+customer_segmentation_view
+High_value_customer
+Branch_performance
+Customer_Account_Summary
+Loan_Portfolio_summary
+Customer_risk_view
+Inactive_Customers
+Customer_status_Analysis
+Approved_loan_portfolio
+```
+
+The reporting views help centralize business logic and provide Power BI with clean analytical datasets.
+
+---
+
+# ⚙️ Stored Procedures
+
+Stored procedures were created for reusable operational reporting.
+
+### Customer Profile
+
+```sql
+sp_get_customer_profile
+```
+
+Provides:
+
+* Customer details
+* Number of accounts
+* Total balance
+* Number of loans
+* Total loan amount
+* Customer status
+
+### Branch Performance
+
+```sql
+sp_get_branch_performance
+```
+
+Provides:
+
+* Branch details
+* Number of accounts
+* Total deposits
+* Average account balance
+
+### Customer Loan Risk
+
+```sql
+sp_get_customer_loan_risk
+```
+
+Provides:
+
+* Number of loans
+* Total loan exposure
+* Average loan amount
+* LTI-based risk category
+
+### Transaction Summary
+
+```sql
+sp_get_transaction_summary
+```
+
+Provides:
+
+* Total transactions
+* Total transaction amount
+* Average transaction value
+
+---
+
+# ⚡ SQL Indexing
+
+An index was created on transaction date to support date-based transaction analysis.
+
+```sql
+CREATE INDEX idx_transaction_date
+ON Transactions$(Transaction_Date);
+```
+
+The index was then validated using SQL Server index metadata tools.
+
+---
+
+# 📊 Power BI Dashboards
+
+The SQL analytical layer was connected to **Power BI** to build multiple interactive dashboards.
+
+The project contains approximately **6–7 dashboard/report pages**, covering different banking business areas.
+
+## 1. 🏦 Executive / Bank Performance Dashboard
+
+Provides a high-level overview of the bank.
+
+### Key KPIs
+
+* Total Customers
+* Total Accounts
+* Total Deposits
+* Total Transactions
+* Total Loan Applications
+* Approved Loan Portfolio
+* Average Account Balance
+
+Designed primarily for senior management and executive-level monitoring.
+
+---
+
+## 2. 👥 Customer Analytics Dashboard
+
+Focuses on customer demographics, value, and behavior.
+
+### Analysis Areas
+
+* Customer distribution by city
+* Customer income segments
+* Account balances
+* Customer activity
+* Customer value
+* High-value customers
+* Customer demographics
+
+---
+
+## 3. 💳 Loan Risk Dashboard
+
+Focuses on lending and credit risk.
+
+### Analysis Areas
+
+* Loan application status
+* Loan type distribution
+* Approved loan exposure
+* Loan-to-income ratio
+* Risk categories
+* Loan amount distribution
+* Risk by customer/product
+
+---
+
+## 4. 🏢 Branch Performance Dashboard
+
+Analyzes branch-level performance.
+
+### Metrics
+
+* Total deposits
+* Number of accounts
+* Number of customers
+* Transaction volume
+* Transaction value
+* Approved loan exposure
+* Branch ranking
+
+This dashboard enables branch-level comparison and operational monitoring.
+
+---
+
+## 5. 📦 Product Analysis Dashboard
+
+Analyzes banking product adoption and contribution.
+
+### Account Products
+
+* Account count
+* Customer count
+* Deposit value
+* Average account balance
+* Product distribution
+
+### Loan Products
+
+* Loan count
+* Total loan exposure
+* Average loan size
+* Portfolio contribution
+
+---
+
+## 6. 💸 Transaction Activity Dashboard
+
+Focuses on banking transaction behavior.
+
+### Analysis Areas
+
+* Monthly transaction trends
+* Transaction types
+* Transaction volume
+* Transaction value
+* Average transaction amount
+* Active accounts
+* Active customers
+
+---
+
+## 7. 👤 Customer 360 / Segmentation Dashboard
+
+Provides a consolidated customer-level perspective.
+
+Combines:
+
+* Customer demographics
+* Account relationships
+* Deposit balances
+* Transaction activity
+* Loan exposure
+* Customer value score
+* Customer segmentation
+
+This provides a more complete view of the customer's relationship with the bank.
+
+---
+
+# 📐 Power BI Data Modeling
+
+Power BI was used for:
+
+* Data modeling
+* Relationships
+* Measures
+* KPI cards
+* Interactive filtering
+* Drill-down analysis
+* Dashboard design
+* Business intelligence reporting
+
+The project uses a combination of **SQL analytical views and dimensional/Star Schema concepts** to provide clean reporting datasets.
+
+---
+
+# 📏 Important Business Metrics
+
+The project calculates several banking KPIs.
+
+| KPI                     | Description                           |
+| ----------------------- | ------------------------------------- |
+| Total Customers         | Total number of registered customers  |
+| Total Accounts          | Total number of bank accounts         |
+| Total Deposits          | Sum of account balances               |
+| Total Transactions      | Number of recorded transactions       |
+| Transaction Value       | Total monetary value of transactions  |
+| Average Account Balance | Average account balance               |
+| Loan Applications       | Total loan applications               |
+| Approved Loan Exposure  | Total value of approved loans         |
+| Average Loan Size       | Average loan amount                   |
+| Customer Activity       | Transaction-based customer engagement |
+| Customer Value Score    | Composite customer value metric       |
+| Loan-to-Income Ratio    | Loan amount relative to annual income |
+
+---
+
+# 🛠️ Technology Stack
+
+### Database & SQL
+
+* SQL Server
+* SQL
+* DDL
+* DML
+* DQL
+* CTEs
+* Window Functions
+* Views
+* Stored Procedures
+* Constraints
+* Indexing
+
+### Data Modeling
+
+* ERD
+* Relational Database Design
+* Primary Keys
+* Foreign Keys
+* Referential Integrity
+* Normalization
+
+### Business Intelligence
+
+* Microsoft Power BI
+* DAX
+* Power BI Data Modeling
+* Interactive Dashboards
+* KPI Visualization
+
+---
+
+# 🧪 Data Validation Approach
+
+The project follows a validation-first approach:
+
+```text
+Source Tables
+     ↓
+Completeness Checks
+     ↓
+Duplicate Checks
+     ↓
+Business Rule Validation
+     ↓
+Referential Integrity
+     ↓
+SQL Analytical Validation
+     ↓
+Reporting Views
+     ↓
+Power BI
+```
+
+Analytical outputs were cross-checked against source tables to reduce inconsistencies between SQL calculations and dashboard results.
+
+---
+
+# 🧠 Key SQL Challenges Addressed
+
+## 1. Join Multiplication
+
+When joining customers with multiple accounts, transactions, and loans, direct joins can multiply rows and incorrectly inflate aggregates.
+
+For example:
+
+```text
+Customer
+   ↓
+2 Accounts
+   ↓
+10 Transactions per account
+```
+
+A direct multi-table join can produce multiple rows for the same underlying account balance.
+
+### Solution
+
+The project uses **pre-aggregation** through CTEs and derived tables before joining multiple one-to-many datasets.
+
+This ensures that:
+
+* Account balances are not duplicated
+* Transaction values remain accurate
+* Loan exposure is not artificially inflated
+
+---
+
+## 2. Customer Primary Branch Logic
+
+Customers can potentially have multiple accounts associated with different branches.
+
+For branch-level customer attribution, a primary branch was determined using the earliest account opening date.
+
+```sql
+SELECT
+    a.Customer_ID,
+    a.Account_ID,
+    a.Branch_ID,
+    a.Opening_Date
+FROM Accounts$ a
+WHERE a.Opening_Date =
+(
+    SELECT MIN(a2.Opening_Date)
+    FROM Accounts$ a2
+    WHERE a2.Customer_ID = a.Customer_ID
+);
+```
+
+This allows customer-level branch analysis while preserving the original account relationships.
+
+---
+
+# 📌 Example Business Questions Answered
+
+The project can answer questions such as:
+
+### Customer
+
+* How many customers does the bank have?
+* Which cities have the highest customer concentration?
+* Which customers maintain the highest balances?
+* Which customers have multiple products?
+* Which customers are highly active?
+* Which customers fall into premium segments?
+
+### Transactions
+
+* What is the total transaction volume?
+* Which transaction types dominate?
+* How does transaction activity change month by month?
+* Which customers generate the highest transaction activity?
+
+### Loans
+
+* Which loan products are most popular?
+* What percentage of applications are approved?
+* What is the approved loan exposure?
+* Which customers have high loan-to-income ratios?
+* How is the loan portfolio distributed across risk categories?
+
+### Branches
+
+* Which branches manage the highest deposit balances?
+* How many customers and accounts does each branch serve?
+* Which branches generate the highest transaction activity?
+* How does branch performance vary geographically?
+
+### Products
+
+* Which account products have the highest adoption?
+* Which loan products contribute the most exposure?
+* What is the average balance by account type?
+* How many products does each customer use?
+
+---
+
+# 📁 Suggested Repository Structure
+
+```text
+Banking-Analytics-End-to-End/
+│
+├── database/
+│   ├── schema/
+│   ├── tables/
+│   └── constraints/
+│
+├── datasets/
+│   ├── Customers.csv
+│   ├── Accounts.csv
+│   ├── Transactions.csv
+│   ├── Loans.csv
+│   └── Branches.csv
+│
+├── sql/
+│   ├── data_validation.sql
+│   ├── business_analysis.sql
+│   ├── cte_analysis.sql
+│   ├── window_functions.sql
+│   ├── views.sql
+│   ├── stored_procedures.sql
+│   └── indexing.sql
+│
+├── powerbi/
+│   ├── Banking_Analytics.pbix
+│   └── dashboards/
+│
+├── documentation/
+│   └── ERD.png
+│
+├── images/
+│   └── dashboard_screenshots/
+│
+└── README.md
+```
+
+---
+
+# 📸 Dashboard Preview
+
+Add screenshots of the Power BI dashboards here.
+
+Example:
+
+```text
+Executive Dashboard
+Customer Analytics
+Loan Risk Analysis
+Branch Performance
+Product Analysis
+Transaction Activity
+Customer 360 / Segmentation
+```
+
+You can place dashboard images inside the `images/` folder and display them using Markdown.
+
+---
+
+# 🚀 Project Outcome
+
+This project demonstrates how banking data can be transformed from raw operational tables into an analytical solution using SQL and Power BI.
+
+The solution covers the complete workflow:
+
+**Data → Database → Validation → SQL Analytics → Business Logic → Analytical Views → Power BI → Business Insights**
+
+The project particularly demonstrates practical skills in:
+
+* SQL querying
+* Data quality validation
+* Relational database design
+* ERD modeling
+* Advanced SQL
+* CTEs
+* Window functions
+* Stored procedures
+* SQL views
+* Data integrity
+* Customer segmentation
+* Loan risk analysis
+* KPI development
+* Power BI
+* Business intelligence
+* Dashboard development
+
+---
+
+# 🔗 Project Reference
+
+The project was developed with reference to the banking analytics architecture and dashboard concepts documented in the following GitHub repository:
+
+[Banking Analytics End-to-End — GitHub Reference](https://github.com/udayanmaiti2005-maker/Banking-Analytics-End-to-End?utm_source=chatgpt.com)
+
+The referenced project describes a similar end-to-end architecture involving relational database design, SQL analytical views, customer 360, customer segmentation, loan risk, branch performance, product analytics, transaction activity, and Power BI dashboards.
+
+---
+
+# 👨‍💻 Skills Demonstrated
+
+**SQL | Data Analysis | Data Cleaning | Data Validation | Database Design | ERD | Advanced SQL | CTE | Window Functions | Stored Procedures | SQL Views | Indexing | Power BI | DAX | Data Modeling | Business Intelligence | Banking Analytics**
+
+---
+
+## ⭐ If you find this project useful
+
+Feel free to explore the SQL scripts, database design, ERD, and Power BI dashboards to understand the complete analytics workflow.
